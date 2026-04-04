@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category - StreamVault</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo" onclick="window.location.href='home.html'">STREAMVAULT</div>
+                <div class="nav-links">
+                    <a href="home.html">Home</a>
+                    <span class="user-info">
+                        <span id="user-name"></span>
+                        <span id="admin-link"></span>
+                    </span>
+                    <button onclick="handleLogout()">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <!-- Category Header -->
+        <div class="category-header">
+            <h1 class="category-title" id="category-name">Loading...</h1>
+            <p class="category-count" id="video-count">0 videos</p>
+        </div>
+        
+        <!-- Video Grid -->
+        <div id="videos-container">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading videos...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/auth.js"></script>
+    <script>
+        // Get genre from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const genre = urlParams.get('genre');
+        
+        // Check authentication
+        checkAuth();
+        
+        // Display user info
+        const user = getUser();
+        if (user) {
+            document.getElementById('user-name').textContent = user.name;
+            if (user.isAdmin) {
+                document.getElementById('admin-link').innerHTML = '<a href="admin.html">Admin Panel</a>';
+            }
+        }
+        
+        // Load videos for this genre
+        async function loadCategoryVideos() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`http://localhost:5000/api/videos?genre=${genre}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch videos');
+                }
+                
+                const videos = await response.json();
+                
+                // Update header
+                document.getElementById('category-name').textContent = genre;
+                document.getElementById('video-count').textContent = `${videos.length} video${videos.length !== 1 ? 's' : ''}`;
+                
+                const container = document.getElementById('videos-container');
+                
+                if (videos.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h3>No Videos Found</h3>
+                            <p>There are no videos in this category yet.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Create video grid
+                let html = '<div class="video-grid">';
+                videos.forEach(video => {
+                    html += `
+                        <div class="video-card" onclick="window.location.href='player.html?id=${video._id}'">
+                            <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail" onerror="this.src='https://via.placeholder.com/400x225/1B3C53/D2C1B6?text=No+Thumbnail'">
+                            <div class="video-info">
+                                <h3 class="video-title">${video.title}</h3>
+                                <div class="video-meta">
+                                    <span class="video-duration">${video.duration}</span>
+                                    <span class="video-views">👁 ${video.views.toLocaleString()} views</span>
+                                </div>
+                                <span class="genre-badge">${video.genre}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading videos:', error);
+                document.getElementById('videos-container').innerHTML = `
+                    <div class="empty-state">
+                        <h3>Error Loading Videos</h3>
+                        <p>Unable to load videos. Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Load videos on page load
+        if (genre) {
+            loadCategoryVideos();
+        } else {
+            window.location.href = 'home.html';
+        }
+    </script>
+</body>
+</html>

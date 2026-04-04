@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Video - StreamVault</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo" onclick="window.location.href='home.html'">STREAMVAULT</div>
+                <div class="nav-links">
+                    <a href="home.html">Home</a>
+                    <span class="user-info">
+                        <span id="user-name"></span>
+                        <span id="admin-link"></span>
+                    </span>
+                    <button onclick="handleLogout()">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div id="player-wrapper">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading video...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/auth.js"></script>
+    <script src="js/player.js"></script>
+</body>
+</html>

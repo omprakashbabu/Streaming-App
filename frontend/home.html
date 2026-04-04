@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - StreamVault</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo" onclick="window.location.href='home.html'">STREAMVAULT</div>
+                <div class="nav-links">
+                    <a href="home.html">Home</a>
+                    <span class="user-info">
+                        <span id="user-name"></span>
+                        <span id="admin-link"></span>
+                    </span>
+                    <button onclick="handleLogout()">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <!-- Hero Banner -->
+        <div class="hero-banner">
+            <div class="hero-content">
+                <h1 class="hero-title">DISCOVER UNLIMITED</h1>
+                <p class="hero-subtitle">Stream thousands of videos across all your favorite genres</p>
+            </div>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-bar" placeholder="Search for videos...">
+            <span class="search-icon">🔍</span>
+        </div>
+        
+        <!-- Search Results -->
+        <div id="search-results" style="display: none;">
+            <div class="genre-section">
+                <h2 class="section-title">Search Results</h2>
+                <div id="search-grid" class="video-grid"></div>
+            </div>
+        </div>
+        
+        <!-- Genre Sections -->
+        <div id="genres-container">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading videos...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/auth.js"></script>
+    <script src="js/home.js"></script>
+</body>
+</html>

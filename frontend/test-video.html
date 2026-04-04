@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video URL Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1B3C53;
+            color: #D2C1B6;
+        }
+        .box {
+            background: #234C6A;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 2px solid #D2C1B6;
+        }
+        button {
+            background: #D2C1B6;
+            color: #1B3C53;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            background: #1B3C53;
+            border: 2px solid #456882;
+            color: #D2C1B6;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        pre {
+            background: #1B3C53;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        video {
+            width: 100%;
+            max-width: 800px;
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎥 Video URL Test Tool</h1>
+    
+    <div class="box">
+        <h2>Step 1: Enter Video ID</h2>
+        <p>Go to your admin panel, find the video, and copy its ID from the URL or table</p>
+        <input type="text" id="video-id" placeholder="Enter MongoDB Video ID (e.g., 65f3a1b2c...)">
+        <button onclick="testVideo()">Test Video</button>
+    </div>
+    
+    <div class="box">
+        <h2>API Response</h2>
+        <pre id="api-response">Waiting for test...</pre>
+    </div>
+    
+    <div class="box">
+        <h2>Video URL</h2>
+        <pre id="video-url">No URL generated yet</pre>
+        <button onclick="copyURL()" id="copy-btn" style="display:none;">Copy URL</button>
+        <button onclick="testURLInBrowser()" id="test-btn" style="display:none;">Open URL in New Tab</button>
+    </div>
+    
+    <div class="box">
+        <h2>Video Player Test</h2>
+        <div id="player-container">
+            <p>Video will appear here after testing...</p>
+        </div>
+    </div>
+    
+    <script>
+        let currentVideoURL = '';
+        
+        async function testVideo() {
+            const videoId = document.getElementById('video-id').value.trim();
+            const responseDiv = document.getElementById('api-response');
+            const urlDiv = document.getElementById('video-url');
+            const playerContainer = document.getElementById('player-container');
+            
+            if (!videoId) {
+                alert('Please enter a video ID!');
+                return;
+            }
+            
+            responseDiv.textContent = 'Testing...';
+            urlDiv.textContent = 'Generating...';
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    responseDiv.textContent = '❌ ERROR: Not logged in! Please login first.';
+                    return;
+                }
+                
+                const response = await fetch(`http://localhost:5000/api/videos/${videoId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    const error = await response.text();
+                    responseDiv.textContent = `❌ API Error (${response.status}):\n${error}`;
+                    return;
+                }
+                
+                const video = await response.json();
+                responseDiv.textContent = '✅ API Response:\n' + JSON.stringify(video, null, 2);
+                
+                if (video.videoUrl) {
+                    currentVideoURL = video.videoUrl;
+                    urlDiv.textContent = '✅ Signed URL Generated:\n' + video.videoUrl.substring(0, 150) + '...';
+                    document.getElementById('copy-btn').style.display = 'inline-block';
+                    document.getElementById('test-btn').style.display = 'inline-block';
+                    
+                    // Try to play video
+                    playerContainer.innerHTML = `
+                        <video controls autoplay style="width: 100%; max-width: 800px;">
+                            <source src="${video.videoUrl}" type="video/mp4">
+                            <source src="${video.videoUrl}" type="video/x-matroska">
+                            Your browser does not support the video tag.
+                        </video>
+                        <p style="margin-top: 10px;">
+                            ${video.title}<br>
+                            Genre: ${video.genre} | Duration: ${video.duration}
+                        </p>
+                    `;
+                    
+                    // Add video error handler
+                    const videoElement = playerContainer.querySelector('video');
+                    videoElement.addEventListener('error', (e) => {
+                        playerContainer.innerHTML += '<p style="color: #e50914;">❌ Video Error: ' + e.target.error.message + '</p>';
+                    });
+                    
+                    videoElement.addEventListener('loadeddata', () => {
+                        playerContainer.innerHTML += '<p style="color: #46d369;">✅ Video loaded successfully!</p>';
+                    });
+                    
+                } else {
+                    urlDiv.textContent = '❌ No videoUrl in response!';
+                }
+                
+            } catch (error) {
+                responseDiv.textContent = '❌ Error:\n' + error.message;
+                console.error('Full error:', error);
+            }
+        }
+        
+        function copyURL() {
+            navigator.clipboard.writeText(currentVideoURL);
+            alert('URL copied to clipboard!');
+        }
+        
+        function testURLInBrowser() {
+            window.open(currentVideoURL, '_blank');
+        }
+        
+        // Check login status
+        window.addEventListener('load', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('⚠️ You are not logged in! Please login first at http://localhost:5000');
+            }
+        });
+    </script>
+</body>
+</html>

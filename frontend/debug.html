@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Info - StreamVault</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1B3C53;
+            color: #D2C1B6;
+        }
+        .debug-box {
+            background: #234C6A;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 2px solid #D2C1B6;
+        }
+        button {
+            background: #D2C1B6;
+            color: #1B3C53;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #c4b5a9;
+        }
+        pre {
+            background: #1B3C53;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 StreamVault Debug Page</h1>
+    
+    <div class="debug-box">
+        <h2>Authentication Status</h2>
+        <p><strong>Token exists:</strong> <span id="token-status"></span></p>
+        <p><strong>User data exists:</strong> <span id="user-status"></span></p>
+    </div>
+    
+    <div class="debug-box">
+        <h2>User Information</h2>
+        <pre id="user-info"></pre>
+    </div>
+    
+    <div class="debug-box">
+        <h2>Token (First 50 chars)</h2>
+        <pre id="token-info"></pre>
+    </div>
+    
+    <div class="debug-box">
+        <h2>Actions</h2>
+        <button onclick="window.location.href='index.html'">Go to Login</button>
+        <button onclick="window.location.href='home.html'">Go to Home</button>
+        <button onclick="window.location.href='admin.html'">Go to Admin</button>
+        <button onclick="clearData()">Clear All Data</button>
+        <button onclick="testAPI()">Test API Connection</button>
+    </div>
+    
+    <div class="debug-box">
+        <h2>API Test Result</h2>
+        <pre id="api-result">Click "Test API Connection" to check backend...</pre>
+    </div>
+    
+    <script>
+        // Check token
+        const token = localStorage.getItem('token');
+        document.getElementById('token-status').textContent = token ? '✅ YES' : '❌ NO';
+        document.getElementById('token-info').textContent = token ? token.substring(0, 50) + '...' : 'No token found';
+        
+        // Check user
+        const userStr = localStorage.getItem('user');
+        document.getElementById('user-status').textContent = userStr ? '✅ YES' : '❌ NO';
+        
+        if (userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                document.getElementById('user-info').textContent = JSON.stringify(user, null, 2);
+            } catch (e) {
+                document.getElementById('user-info').textContent = 'Error parsing user data: ' + e.message;
+            }
+        } else {
+            document.getElementById('user-info').textContent = 'No user data found';
+        }
+        
+        // Clear data function
+        function clearData() {
+            if (confirm('Clear all authentication data?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                alert('Data cleared! Reloading page...');
+                location.reload();
+            }
+        }
+        
+        // Test API
+        async function testAPI() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.textContent = 'Testing...';
+            
+            try {
+                // Test health endpoint
+                const healthRes = await fetch('http://localhost:5000/api/health');
+                const healthData = await healthRes.json();
+                
+                let result = '✅ Backend is running!\n\n';
+                result += 'Health Check:\n' + JSON.stringify(healthData, null, 2) + '\n\n';
+                
+                // Test authenticated endpoint
+                if (token) {
+                    const videoRes = await fetch('http://localhost:5000/api/videos', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (videoRes.ok) {
+                        const videos = await videoRes.json();
+                        result += `✅ Authentication works!\n`;
+                        result += `Found ${videos.length} videos in database\n`;
+                    } else {
+                        result += '❌ Authentication failed: ' + videoRes.status + '\n';
+                    }
+                } else {
+                    result += '⚠️ No token to test authentication\n';
+                }
+                
+                resultDiv.textContent = result;
+            } catch (error) {
+                resultDiv.textContent = '❌ Error: ' + error.message;
+            }
+        }
+        
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            setTimeout(testAPI, 500);
+        });
+    </script>
+</body>
+</html>

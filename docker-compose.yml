@@ -1,0 +1,64 @@
+version: '3.8'
+ 
+services:
+  # MongoDB Container
+  mongodb:
+    image: mongo:7.0
+    container_name: streamvault-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: video-streaming
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - streamvault-network
+ 
+  # Backend Container
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: streamvault-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/video-streaming
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: 5000
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    depends_on:
+      - mongodb
+    networks:
+      - streamvault-network
+ 
+  # Frontend Container
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: streamvault-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - streamvault-network
+ 
+# Named volumes for data persistence
+volumes:
+  mongodb_data:
+    driver: local
+ 
+# Custom network
+networks:
+  streamvault-network:
+    driver: bridge

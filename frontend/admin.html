@@ -148,7 +148,7 @@
         async function loadVideos() {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:5000/api/admin/videos', {
+                const response = await fetch('/api/admin/videos', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -214,7 +214,7 @@
         async function editVideo(id) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`http://localhost:5000/api/videos/${id}`, {
+                const response = await fetch(`api/videos/${id}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -247,7 +247,7 @@
             
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`http://localhost:5000/api/admin/videos/${id}`, {
+                const response = await fetch(`/api/admin/videos/${id}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -285,8 +285,8 @@
             try {
                 const token = localStorage.getItem('token');
                 const url = editingVideoId 
-                    ? `http://localhost:5000/api/admin/videos/${editingVideoId}`
-                    : 'http://localhost:5000/api/admin/videos';
+                    ? `/api/admin/videos/${editingVideoId}`
+                    : '/api/admin/videos';
                 
                 const method = editingVideoId ? 'PUT' : 'POST';
                 

@@ -17,7 +17,7 @@ let searchTimeout;
 async function loadVideos() {
     try {
         const token = getToken();
-        const response = await fetch('http://localhost:5000/api/videos', {
+        const response = await fetch('/api/videos', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -141,7 +141,7 @@ document.getElementById('search-input').addEventListener('input', (e) => {
 async function performSearch(query) {
     try {
         const token = getToken();
-        const response = await fetch(`http://localhost:5000/api/videos/search?q=${encodeURIComponent(query)}`, {
+        const response = await fetch(`/api/videos/search?q=${encodeURIComponent(query)}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }

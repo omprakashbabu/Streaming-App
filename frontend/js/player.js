@@ -22,7 +22,7 @@ if (!videoId) {
 async function loadVideo() {
     try {
         const token = getToken();
-        const response = await fetch(`http://localhost:5000/api/videos/${videoId}`, {
+        const response = await fetch(`/api/videos/${videoId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }

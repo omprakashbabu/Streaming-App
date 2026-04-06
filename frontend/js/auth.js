@@ -1,5 +1,8 @@
-// API Base URL
-const API_URL = 'http://localhost:5000/api';
+// API Base URL - For windows
+//const API_URL = 'http://localhost:5000/api';
+
+// API Base URL - use relative path for Docker/nginx proxy
+const API_URL = '/api';
 
 // Show alert message
 function showAlert(message, type = 'info') {

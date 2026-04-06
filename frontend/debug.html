@@ -110,7 +110,7 @@
             
             try {
                 // Test health endpoint
-                const healthRes = await fetch('http://localhost:5000/api/health');
+                const healthRes = await fetch('/api/health');
                 const healthData = await healthRes.json();
                 
                 let result = '✅ Backend is running!\n\n';
@@ -118,7 +118,7 @@
                 
                 // Test authenticated endpoint
                 if (token) {
-                    const videoRes = await fetch('http://localhost:5000/api/videos', {
+                    const videoRes = await fetch('/api/videos', {
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }
